@@ -1,0 +1,86 @@
+name: cloudhub
+
+mgmt:
+  network: cloudhub-internet
+  ipv4-subnet: 172.20.0.0/24
+
+topology:
+  nodes:
+    hub:
+      kind: linux
+      image: wg-node:latest
+      mgmt-ipv4: 172.20.0.10
+      binds:
+        - hub/wg0.conf:/etc/wireguard/wg0.conf
+        - hub/startup.sh:/startup.sh
+      cmd: bash /startup.sh
+      sysctls:
+        net.ipv4.ip_forward: 1
+        net.ipv4.conf.all.src_valid_mark: 1
+
+    spoke-of1:
+      kind: linux
+      image: wg-node:latest
+      mgmt-ipv4: 172.20.0.11
+      binds:
+        - spoke-of1/wg0.conf:/etc/wireguard/wg0.conf
+        - spoke-of1/startup.sh:/startup.sh
+      cmd: bash /startup.sh
+      sysctls:
+        net.ipv4.ip_forward: 1
+
+    spoke-of2:
+      kind: linux
+      image: wg-node:latest
+      mgmt-ipv4: 172.20.0.12
+      binds:
+        - spoke-of2/wg0.conf:/etc/wireguard/wg0.conf
+        - spoke-of2/startup.sh:/startup.sh
+      cmd: bash /startup.sh
+      sysctls:
+        net.ipv4.ip_forward: 1
+
+    spoke-rem1:
+      kind: linux
+      image: wg-node:latest
+      mgmt-ipv4: 172.20.0.13
+      binds:
+        - spoke-rem1/wg0.conf:/etc/wireguard/wg0.conf
+        - spoke-rem1/startup.sh:/startup.sh
+      cmd: bash /startup.sh
+      sysctls:
+        net.ipv4.ip_forward: 1
+
+    srv-corp:
+      kind: linux
+      image: srv-node:latest
+      binds:
+        - srv-corp/startup.sh:/startup.sh
+      cmd: bash /startup.sh
+
+    pc-of1:
+      kind: linux
+      image: alpine:latest
+      binds:
+        - pc-of1/startup.sh:/startup.sh
+      cmd: ash /startup.sh
+
+    pc-of2:
+      kind: linux
+      image: alpine:latest
+      binds:
+        - pc-of2/startup.sh:/startup.sh
+      cmd: ash /startup.sh
+
+    pc-rem1:
+      kind: linux
+      image: alpine:latest
+      binds:
+        - pc-rem1/startup.sh:/startup.sh
+      cmd: ash /startup.sh
+
+  links:
+    - endpoints: ["hub:eth1", "srv-corp:eth1"]
+    - endpoints: ["spoke-of1:eth1", "pc-of1:eth1"]
+    - endpoints: ["spoke-of2:eth1", "pc-of2:eth1"]
+    - endpoints: ["spoke-rem1:eth1", "pc-rem1:eth1"]

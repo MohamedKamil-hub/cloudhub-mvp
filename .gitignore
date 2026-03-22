@@ -1,0 +1,12 @@
+# Claves WireGuard (NUNCA subir a GitHub)
+*/privatekey
+*/publickey
+
+# Ficheros temporales de Containerlab
+clab-cloudhub/
+
+# Ficheros del sistema
+*.swp
+*.swo
+*~
+.DS_Store
