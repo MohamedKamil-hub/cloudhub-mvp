@@ -1,11 +1,5 @@
 # Cloud-Hub MVP — SECCIÓN 9
 
-Red corporativa segura para PYMES usando WireGuard, simulada con Containerlab.
-
-## Qué es esto
-
-Este proyecto simula una arquitectura de red real que podría vender una empresa de ciberseguridad a pequeñas empresas. La idea es sencilla: un servidor central en la nube (el "Hub") conecta a todos los empleados — estén en la oficina o en su casa — mediante túneles VPN cifrados con WireGuard.
-
 En esta demo, todo corre en tu propio ordenador usando contenedores Docker orquestados por Containerlab. No necesitas servidores remotos ni hardware especial.
 
 ### Qué vas a ver funcionando
@@ -64,13 +58,13 @@ Necesitas una máquina Linux (Ubuntu 22.04 o superior). Puede ser una VM en Virt
 ### Paso 1: Clonar el repo
 
 ```bash
-git clone https://github.com/TU_USUARIO/cloudhub-mvp.git
+git clone https://github.com/MohamedKamil-hub/cloudhub-mvp
 cd cloudhub-mvp
 ```
 
 ### Paso 2: Construir las imágenes Docker (solo la primera vez)
 
-Esto crea dos imágenes con los paquetes de red preinstalados. Tarda unos minutos la primera vez, después es instantáneo.
+Esto crea dos imágenes con los paquetes de red preinstalados. 
 
 ```bash
 sudo docker build -t wg-node:latest -f Dockerfile.wg .
@@ -91,7 +85,7 @@ bash generate-configs.sh
 sudo containerlab deploy --topo cloudhub.clab.yml
 ```
 
-Espera a que termine (debería tardar menos de 30 segundos). Verás una tabla con 8 nodos en estado `running`.
+Espera a que termine. Veras una tabla con 8 nodos en estado `running`.
 
 ### Paso 5: Verificar que todo funciona
 
@@ -208,10 +202,4 @@ cloudhub-mvp/
 | Los `.conf` dicen `GENERATED_BY_SETUP_SCRIPT` | Ejecutar `bash generate-configs.sh` antes de desplegar |
 | Imágenes Docker no encontradas | Construirlas: `sudo docker build -t wg-node:latest -f Dockerfile.wg .` |
 
----
 
-## Autor
-
-Proyecto desarrollado por **SECCIÓN 9** como MVP de servicio de ciberseguridad gestionada para PYMES.
-
-Tecnologías: WireGuard, Docker, Containerlab, iptables, Linux.
