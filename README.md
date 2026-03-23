@@ -42,61 +42,44 @@ En esta demo, todo corre en tu propio ordenador usando contenedores Docker orque
 
 ## Requisitos
 
-Necesitas una máquina Linux (Ubuntu 22.04 o superior). Puede ser una VM en VirtualBox.
+- **Sistema operativo:** Linux (Ubuntu 22.04 o superior). Puede ser una VM en VirtualBox.
+- **RAM libre:** 4 GB mínimo
+- **Disco libre:** 10 GB mínimo
+- **Conexión a internet** (solo para la instalación inicial)
 
-| Software | Cómo instalarlo |
-|---|---|
-| **Docker** | `curl -fsSL https://get.docker.com \| sh` |
-| **Containerlab** | `sudo bash -c "$(curl -sL https://get.containerlab.dev)"` |
-| **WireGuard tools** | `sudo apt install -y wireguard-tools` |
-| **Módulo WireGuard** | `sudo modprobe wireguard` (ya viene en kernels 5.6+) |
+> **No necesitas instalar nada manualmente.** El script `setup.sh` instala todas las dependencias automáticamente.
 
 ---
 
-## Cómo ponerlo en marcha (5 pasos)
+## Cómo ponerlo en marcha (3 pasos)
 
-### Paso 1: Clonar el repo
+### Paso 1: Clonar el repo y ejecutar el setup
 
 ```bash
 git clone https://github.com/MohamedKamil-hub/cloudhub-mvp
 cd cloudhub-mvp
+sudo bash setup.sh
 ```
 
-### Paso 2: Construir las imágenes Docker (solo la primera vez)
+Este script instala automáticamente: Docker, WireGuard tools, Containerlab, construye las imágenes Docker y genera las claves WireGuard. Tarda unos minutos la primera vez.
 
-Esto crea dos imágenes con los paquetes de red preinstalados. 
+> **Si al terminar el setup te dice que cierres sesión**, hazlo (`exit` o cierra la terminal) y vuelve a entrar antes de continuar. Esto es para activar los permisos de Docker.
 
-```bash
-sudo docker build -t wg-node:latest -f Dockerfile.wg .
-sudo docker build -t srv-node:latest -f Dockerfile.srv .
-```
-
-### Paso 3: Generar claves y configuraciones
-
-Este script genera las claves WireGuard únicas para tu máquina y escribe todos los ficheros `.conf` automáticamente.
-
-```bash
-bash generate-configs.sh
-```
-
-### Paso 4: Desplegar el laboratorio
+### Paso 2: Desplegar el laboratorio
 
 ```bash
 sudo containerlab deploy --topo cloudhub.clab.yml
 ```
 
-Espera a que termine. Veras una tabla con 8 nodos en estado `running`.
+Espera a que termine. Verás una tabla con 8 nodos en estado `running`.
 
-### Paso 5: Verificar que todo funciona
-
-Espera 10 segundos tras el deploy y ejecuta los tests:
+### Paso 3: Verificar que todo funciona
 
 ```bash
-sleep 10
-bash run-tests.sh
+sleep 10 && bash run-tests.sh
 ```
 
-Deberías ver algo así:
+Deberías ver:
 
 ```
   [PASS] Hub -> Spoke OF1 (10.10.1.10)
@@ -153,12 +136,13 @@ sudo containerlab deploy --topo cloudhub.clab.yml
 ```
 cloudhub-mvp/
 ├── cloudhub.clab.yml      # Topología de Containerlab (el "plano" de la red)
+├── setup.sh               # Instala TODO y deja el entorno listo
 ├── generate-configs.sh    # Genera claves WireGuard y escribe los .conf
 ├── run-tests.sh           # Tests automáticos de validación
 ├── Dockerfile.wg          # Imagen Docker con WireGuard preinstalado
 ├── Dockerfile.srv         # Imagen Docker para el servidor corporativo
 ├── hub/
-│   ├── wg0.conf           # Config WireGuard del Hub (se genera con el script)
+│   ├── wg0.conf           # Config WireGuard del Hub (se genera automáticamente)
 │   └── startup.sh         # Script de arranque del Hub
 ├── spoke-of1/             # Empleado oficina 1
 │   ├── wg0.conf
@@ -195,11 +179,8 @@ cloudhub-mvp/
 
 | Problema | Solución |
 |---|---|
-| `containerlab: command not found` | Instalar Containerlab: `sudo bash -c "$(curl -sL https://get.containerlab.dev)"` |
-| `wg: command not found` | Instalar WireGuard tools: `sudo apt install -y wireguard-tools` |
-| `RTNETLINK: operation not supported` al levantar WireGuard | Cargar el módulo: `sudo modprobe wireguard` |
-| Algún nodo en `restarting` | Destruir y redesplegar: `sudo containerlab destroy --topo cloudhub.clab.yml && sudo containerlab deploy --topo cloudhub.clab.yml` |
-| Los `.conf` dicen `GENERATED_BY_SETUP_SCRIPT` | Ejecutar `bash generate-configs.sh` antes de desplegar |
-| Imágenes Docker no encontradas | Construirlas: `sudo docker build -t wg-node:latest -f Dockerfile.wg .` |
-
-
+| `permission denied` al usar Docker sin sudo | Ejecuta `newgrp docker` o cierra sesión y vuelve a entrar |
+| `RTNETLINK: operation not supported` al levantar WireGuard | `sudo modprobe wireguard` |
+| Algún nodo en `restarting` | `sudo containerlab destroy --topo cloudhub.clab.yml && sudo containerlab deploy --topo cloudhub.clab.yml` |
+| Los `.conf` dicen `GENERATED_BY_SETUP_SCRIPT` | Ejecuta `bash generate-configs.sh` |
+| `run-tests.sh` falla en los primeros tests | Espera 15 segundos más tras el deploy y vuelve a ejecutar |
