@@ -59,6 +59,7 @@ En esta demo, todo corre en tu propio ordenador usando contenedores Docker orque
 git clone https://github.com/MohamedKamil-hub/cloudhub-mvp
 cd cloudhub-mvp
 sudo bash setup.sh
+newgrp docker
 ```
 
 Este script instala automáticamente: Docker, WireGuard tools, Containerlab, construye las imágenes Docker y genera las claves WireGuard. Tarda unos minutos la primera vez.
