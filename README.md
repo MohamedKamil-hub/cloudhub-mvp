@@ -1,6 +1,5 @@
-# Cloud-Hub MVP — SECCIÓN 9
+# MVP — SECCIÓN 9
 
-En esta demo, todo corre en tu propio ordenador usando contenedores Docker orquestados por Containerlab. No necesitas servidores remotos ni hardware especial.
 
 ### CONTIENE
 
@@ -20,16 +19,16 @@ En esta demo, todo corre en tu propio ordenador usando contenedores Docker orque
                   │  10.10.1.1   │
                   └──────┬───────┘
                          │
-            ┌────────────┼────────────┐
-            │            │            │
-     ┌──────┴──────┐ ┌───┴────┐ ┌────┴───────┐
-     │  Spoke-OF1  │ │Spoke-OF2│ │ Spoke-REM1 │
-     │  Oficina 1  │ │Oficina 2│ │Teletrabajo │
-     │ 10.10.1.10  │ │10.10.1.11│ │ 10.10.1.20│
-     └──────┬──────┘ └───┬────┘ └────┬───────┘
-            │            │           │
-        PC-OF1       PC-OF2     PC-REM1
-     192.168.10.10  192.168.11.10  192.168.20.10
+            ┌────────────┼─────────────┐
+            │            │             │
+     ┌──────┴──────┐ ┌───┴──────┐ ┌────┴───────┐
+     │  Spoke-OF1  │ │Spoke-OF2 │ │ Spoke-REM1 │
+     │  Oficina 1  │ │Oficina 2 │ │Teletrabajo │
+     │ 10.10.1.10  │ │10.10.1.11│ │ 10.10.1.20 │
+     └──────┬──────┘ └───┬──────┘ └────┬───────┘
+            │            │             │
+        PC-OF1       PC-OF2          PC-REM1
+ 192.168.10.10     192.168.11.10    192.168.20.10
 
                   ┌──────────────┐
                   │  SRV-CORP    │
@@ -96,24 +95,6 @@ Deberías ver:
   RESULTADO: 10/10 PASS — MVP FUNCIONAL
 ```
 
----
-
-## Pruebas manuales que puedes hacer
-
-```bash
-# Ver el estado de WireGuard en el Hub
-sudo docker exec clab-cloudhub-hub wg show
-
-# Desde el teletrabajador, acceder a la web del servidor corporativo
-sudo docker exec clab-cloudhub-pc-rem1 wget -qO- http://10.10.100.200
-
-# Ping entre un PC de oficina y el teletrabajador (pasa por el Hub)
-sudo docker exec clab-cloudhub-pc-of1 ping -c 3 192.168.20.10
-
-# Comprobar split-tunneling: ver por dónde va cada tipo de tráfico
-sudo docker exec clab-cloudhub-spoke-rem1 ip route get 10.10.1.1      
-sudo docker exec clab-cloudhub-spoke-rem1 ip route get 172.20.0.10    
-```
 
 ---
 
@@ -133,14 +114,14 @@ sudo containerlab deploy --topo cloudhub.clab.yml
 
 ```
 cloudhub-mvp/
-├── cloudhub.clab.yml      # Topología de Containerlab (el "plano" de la red)
+├── cloudhub.clab.yml      # el plano de la red
 ├── setup.sh               # Instala TODO y deja el entorno listo
 ├── generate-configs.sh    # Genera claves WireGuard y escribe los .conf
 ├── run-tests.sh           # Tests automáticos de validación
 ├── Dockerfile.wg          # Imagen Docker con WireGuard preinstalado
 ├── Dockerfile.srv         # Imagen Docker para el servidor corporativo
 ├── hub/
-│   ├── wg0.conf           # Config WireGuard del Hub (se genera automáticamente)
+│   ├── wg0.conf           # Config WireGuard del Hub auto-generado
 │   └── startup.sh         # Script de arranque del Hub
 ├── spoke-of1/             # Empleado oficina 1
 │   ├── wg0.conf
@@ -163,12 +144,12 @@ cloudhub-mvp/
 
 ---
 
-## Cómo funciona
+## funcionamiento
 
-1. **Containerlab** lee `cloudhub.clab.yml` y crea 8 contenedores Docker conectados entre sí.
+1. **Containerlab** lee `cloudhub.clab.yml` y crea 8 contenedores Docker conectados entre si
 2. El **Hub** y los **Spokes** establecen túneles WireGuard cifrados a través de la red de management que simula internet
-3. Los **PCs** se conectan a sus respectivos Spokes por un enlace punto a punto q simula la red local del empleado.
-4. El **servidor corporativo** está en una red privada conectada al Hub. Solo se puede acceder a él a través de la VPN.
-5. El **split-tunneling** hace que solo el tráfico corporativo pase por la VPN. El tráfico a "internet" sale directo.
+3. Los **PCs** se conectan a sus respectivos Spokes por un enlace punto a punto q simula la red local del empleado
+4. El **servidor corporativo** esta en una red privada conectada al Hub. Solo se puede acceder a él a través de la VPN
+5. El **split-tunneling** hace que solo el tráfico corporativo pase por la VPN. el tráfico a internet sale directo
 
 
